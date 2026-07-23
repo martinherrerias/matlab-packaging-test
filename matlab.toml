@@ -1,0 +1,38 @@
+name = "matlab-test"
+
+[folders]
+path = [
+    "src",
+]
+test = [
+    "tests",
+]
+
+[project]
+summary = "Test of new TOML project structure"
+startup-files = [
+    "startup.m",
+]
+
+[[package]]
+configuration-name = "Build"
+unique-id = "f11845d7-9f0c-4a9c-a37e-89b69729ab32"
+output-file-name = "TestPackage.mltbx"
+output-folder = "release"
+name = "TestPackage"
+supported-platforms = [
+    "windows",
+    "linux",
+    "macos",
+]
+display-name = "Test Package"
+version = "0.1.0"
+id = "9dae281f-ff1f-4f2e-a885-ad27c79cf1fb"
+use-license-bsd = true
+provider.name = "Martin"
+provider.email = "martin.herreriasazcue@manchester.ac.uk"
+provider.organization = "University of Manchester"
+summary = "An very useless but very neatly wrapped package"
+description = "The package does not do anything"
+package-root = "/"
+release-compatibility = ">=20.2.*"

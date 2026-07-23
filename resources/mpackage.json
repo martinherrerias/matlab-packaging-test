@@ -1,0 +1,53 @@
+{
+    "name": "TestPackage",
+    "version": "0.1.0",
+    "id": "9dae281f-ff1f-4f2e-a885-ad27c79cf1fb",
+    "formerNames": [],
+    "displayName": "Test Package",
+    "summary": "An very useless but very neatly wrapped package",
+    "tags": [],
+    "readme": "README.md",
+    "provider": {
+        "name": "Martin",
+        "organization": "University of Manchester",
+        "email": "martin.herreriasazcue@manchester.ac.uk",
+        "url": ""
+    },
+    "folders": [
+        {
+            "path": "src",
+            "languages": [
+                "matlab"
+            ]
+        },
+        {
+            "path": "tests",
+            "languages": [
+                "matlab"
+            ]
+        }
+    ],
+    "dependencies": [],
+    "releaseCompatibility": ">=20.2.*",
+    "supportedPlatforms": [
+        {
+            "platform": "windows",
+            "architectures": [
+                "any"
+            ]
+        },
+        {
+            "platform": "linux",
+            "architectures": [
+                "any"
+            ]
+        },
+        {
+            "platform": "macos",
+            "architectures": [
+                "any"
+            ]
+        }
+    ],
+    "schemaVersion": "1.2.0"
+}
