@@ -1,3 +1,21 @@
+> [!WARNING]
+> This branch documents a bug:
+
+```matlab
+matlab.addons.toolbox.ToolboxOptions('matlab.toml')
+Error using matlab.addons.toolbox.ToolboxOptions/set.RequiredAdditionalSoftware (line 648)
+RequiredAdditionalSoftware must be a struct with Name, Platform, DownloadURL, and LicenseURL fields containing string values.
+
+Error in matlab.addons.toolbox.ToolboxOptions/initializeFromTomlTable (line 1580)
+                        obj.RequiredAdditionalSoftware = rasStruct;
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Error in matlab.addons.toolbox.ToolboxOptions (line 114)
+                    obj = obj.initializeFromTomlTable(packageTable);
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+```
+
+---
+
 # Matlab Packaging Test
 
 ## GitHub Integration

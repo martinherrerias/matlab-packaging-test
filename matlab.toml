@@ -36,3 +36,11 @@ summary = "An very useless but very neatly wrapped package"
 description = "The package does not do anything"
 package-root = "/"
 release-compatibility = ">=20.2.*"
+lastAccessed = "1784888916802"
+required-additional-software = [
+    {name = "Example", download-url = "http://example.com/download", license-url = "http://example.com/license", platform = [
+    "Windows",
+    "Linux",
+    "Mac",
+]},
+]
