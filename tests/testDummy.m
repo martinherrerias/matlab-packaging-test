@@ -1,4 +1,4 @@
-function tests = functionTestTemplate
+function tests = testDummy
 % Example of function-based unit tests. See:
 % https://www.mathworks.com/help/matlab/matlab_prog/function-based-unit-tests.html
 % https://www.mathworks.com/help/matlab/matlab_prog/ways-to-write-unit-tests.html
@@ -70,11 +70,15 @@ function testWritingAFileWorks(testCase)
     testCase.verifyTrue(isfile('test.txt'));
 end
 
+function testDummyNoArgs(testCase)
+    testCase.verifyEqual(TestPackage.dummy(), 42)
+end
+
 function testHelperFunction(testCase)
 
     % Another example, this time using a helper function defined below
     result = some_helper_function(6, 7);
-    testCase.verifyEqual(result, 42, 'AbsTol', 1e-6);
+    testCase.verifyEqual(TestPackage.dummy(6, 7), result, 'AbsTol', 1e-6);
 end
 
 %% (Optional) helper functions
