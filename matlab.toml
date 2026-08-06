@@ -1,8 +1,8 @@
-name = "matlab-test"
+name = "TestPackage"
 
 [folders]
 path = [
-    "src",
+    "scripts",
 ]
 test = [
     "tests",
@@ -11,9 +11,13 @@ test = [
 [project]
 summary = "Test of new TOML project structure"
 startup-files = [
-    "startup.m",
+    "scripts/startup.m",
+]
+shutdown-files = [
+    "scripts/shutdown.m",
 ]
 
+[project.labels.test]
 [[package]]
 configuration-name = "Build"
 unique-id = "f11845d7-9f0c-4a9c-a37e-89b69729ab32"
@@ -27,12 +31,14 @@ supported-platforms = [
 ]
 display-name = "Test Package"
 version = "0.1.0"
-id = "9dae281f-ff1f-4f2e-a885-ad27c79cf1fb"
+id = "88a98551-056e-41b9-ac04-3f9a08225bf9"
 use-license-bsd = true
 provider.name = "Martin"
 provider.email = "martin.herreriasazcue@manchester.ac.uk"
 provider.organization = "University of Manchester"
 summary = "An very useless but very neatly wrapped package"
-description = "The package does not do anything"
+description = "An experiment for CI/CD of MATLAB toolboxes (soon 'packages'), trying to embrace the R2026b transition to TOML-based projects."
 package-root = "/"
-release-compatibility = ">=20.2.*"
+release-compatibility = "25.1.* - 26.2.*"
+getting-started-file = "doc/GettingStarted.m"
+preview-image-file = "resources/package-icon.png"

@@ -27,7 +27,6 @@
 % Toolbox files and project files
 **/*.mltbx
 **/*.prj
-**/matlab.toml
 
 % Backup files
 **/*.asv
@@ -40,3 +39,6 @@
 
 % Project resources folder
 resources/
+
+% Package Specific
+external/
