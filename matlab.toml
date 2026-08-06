@@ -19,10 +19,7 @@ shutdown-files = [
 
 [project.labels.test]
 [[package]]
-configuration-name = "Build"
-unique-id = "f11845d7-9f0c-4a9c-a37e-89b69729ab32"
-output-file-name = "TestPackage.mltbx"
-output-folder = "release"
+configuration-name = "Release"
 name = "TestPackage"
 supported-platforms = [
     "windows",
@@ -30,7 +27,7 @@ supported-platforms = [
     "macos",
 ]
 display-name = "Test Package"
-version = "0.1.0"
+version = "0.2.0"
 id = "88a98551-056e-41b9-ac04-3f9a08225bf9"
 use-license-bsd = true
 provider.name = "Martin"
