@@ -1,8 +1,10 @@
 name = "TestPackage"
 
+# Development environment (folders added to the path when project is loaded)
 [folders]
 path = [
     "scripts",
+    "release",
 ]
 test = [
     "tests",
@@ -29,6 +31,8 @@ supported-platforms = [
 display-name = "Test Package"
 version = "0.2.0"
 id = "88a98551-056e-41b9-ac04-3f9a08225bf9"
+# Execution environment (folders added to end-user path)
+folders.path = ["."]
 use-license-bsd = true
 provider.name = "Martin"
 provider.email = "martin.herreriasazcue@manchester.ac.uk"

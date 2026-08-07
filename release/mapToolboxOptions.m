@@ -13,8 +13,7 @@ pkg = prj.package;
 
 root = fullfile(fileparts(prjTOML), pkg.package_root);
 pid = pkg.id;
-paths = {prj.folders.path, prj.folders.test};
-opts = matlab.addons.toolbox.ToolboxOptions(root, pid, ToolboxMatlabPath=paths);
+opts = matlab.addons.toolbox.ToolboxOptions(root, pid);
 
 opts.ToolboxName = pkg.name;
 opts.ToolboxVersion = pkg.version;
@@ -23,6 +22,8 @@ opts.AuthorCompany = pkg.provider.organization;
 opts.AuthorEmail = pkg.provider.email;
 opts.Summary = pkg.summary;
 opts.Description = pkg.description;
+
+opts.ToolboxMatlabPath = pkg.folders.path;
 
 opts = mapReleases(pkg.release_compatibility, opts);
 
