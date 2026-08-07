@@ -1,5 +1,6 @@
 function opts = mapToolboxOptions(prjTOML)
-% Populate matlab.addons.toolbox.ToolboxOptions from matlab.toml
+% Populate matlab.addons.toolbox.ToolboxOptions from matlab.toml,
+% trying to ensure consistent behavior pre- and post-R2026b
 
 arguments
     prjTOML (1,1) string {mustBeFile} = prjPath('matlab.toml')
@@ -8,6 +9,27 @@ end
 wd = cd(fileparts(prjTOML));
 restoreWd = onCleanup(@() cd(wd));
 
+if version('-release') >= "2026b"
+% R2026b+ can populate options automatically from the matlab.toml
+
+    if isfile("package.ignore")
+        ws = warning();
+        restoreWs = onCleanup(@() warning(ws));
+        warning('off','MATLAB:toolbox_packaging:packaging:ToolboxIgnoreDeprecated');
+    end
+    opts = matlab.addons.toolbox.ToolboxOptions(prjTOML);
+
+    opts.Readme = prjPath('README.md');
+    opts.OutputFile = opts.PackageName + '@' + opts.ToolboxVersion + '.mltbx';
+    return
+end
+
+% for <= R2026a, use external/matlab-toml parser
+
+ps = path;
+addpath('external/matlab-toml');
+restorePath = onCleanup(@() path(ps));
+
 prj = readTOML(prjTOML);
 pkg = prj.package;
 
@@ -15,8 +37,10 @@ root = fullfile(fileparts(prjTOML), pkg.package_root);
 pid = pkg.id;
 opts = matlab.addons.toolbox.ToolboxOptions(root, pid);
 
+% NOTE: R2026b uses ToolboxName = pkg.display_name and .PackageName = pkg.name
 opts.ToolboxName = pkg.name;
 opts.ToolboxVersion = pkg.version;
+
 opts.AuthorName = pkg.provider.name;
 opts.AuthorCompany = pkg.provider.organization;
 opts.AuthorEmail = pkg.provider.email;
