@@ -1,0 +1,39 @@
+name: Release
+
+permissions:
+  contents: write
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  my-job:
+    name: Add mltbx file to release artifacts
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+          submodules: recursive
+
+      - name: Set up products
+        uses: matlab-actions/setup-matlab@v3
+        with:
+          release: latest
+          cache: true
+
+      - name: Build toolbox file
+        uses: matlab-actions/run-build@v3
+        with:
+          build-options: -buildFile release/buildfile.m
+          tasks: release
+
+      - name: Upload toolbox to GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: "*.mltbx"
+          fail_on_unmatched_files: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
