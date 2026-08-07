@@ -26,7 +26,7 @@ configuration-name = "Release"
 
 name = "TestPackage"
 display-name = "Test Package"
-version = "0.2.0"
+version = "0.2.1"
 
 # Should match UUID assigned by File Exchange
 id = "88a98551-056e-41b9-ac04-3f9a08225bf9"
@@ -39,7 +39,7 @@ use-license-bsd = true
 provider.name = "Martin"
 provider.email = "martin.herreriasazcue@manchester.ac.uk"
 provider.organization = "University of Manchester"
-summary = "An very useless but very neatly wrapped package"
+summary = "Test of new TOML package structure"
 description = "An experiment for CI/CD of MATLAB toolboxes (soon 'packages'), trying to embrace the R2026b transition to TOML-based projects."
 
 getting-started-file = "doc/GettingStarted.m"
