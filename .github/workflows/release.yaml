@@ -1,9 +1,11 @@
-name: Release
+name: Test and [dry]-release
 
 permissions:
   contents: write
 
 on:
+  pull_request:
+    branches: [main]
   release:
     types: [published]
 
@@ -28,9 +30,10 @@ jobs:
         uses: matlab-actions/run-build@v3
         with:
           build-options: -buildFile release/buildfile.m
-          tasks: release
+          tasks: check test release
 
       - name: Upload toolbox to GitHub release
+        if: github.event_name == 'release'
         uses: softprops/action-gh-release@v2
         with:
           files: "*.mltbx"
