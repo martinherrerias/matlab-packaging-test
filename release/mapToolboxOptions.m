@@ -58,7 +58,7 @@ opts.ToolboxImageFile = pkg.preview_image_file;
 opts.ToolboxGettingStartedGuide = pkg.getting_started_file;
 opts.OutputFile = [pkg.name '@' pkg.version '.mltbx'];
 
-% TODO: TOML doesn't record MATLAB add-ons
+% TODO: TOML doesn't record MATLAB addons?
 % opts.RequiredAddons = ?
 
 % TODO: ToolboxOptions doesn't support non-scalar platforms
@@ -130,7 +130,7 @@ end
 
 function s = mapSupportedPlatforms(supported_platforms)
     map = struct(Win64='windows', Glnxa64='linux', MatlabOnline='online');
-    if year(datetime(version('-date'))) <= 2025
+    if version('-release') <= "2025a"
         map.Maci64='macos';
     else
         map.Mac='macos';
