@@ -11,3 +11,5 @@ resources/*
 !resources/mpackage.json
 !resources/package-icon.png
 !resources/package-icon.info
+
+deploymentLog.html

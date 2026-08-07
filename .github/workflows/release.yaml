@@ -1,0 +1,61 @@
+name: Test and [dry]-release
+
+permissions:
+  contents: write
+
+on:
+  pull_request:
+    branches: [main]
+  release:
+    types: [published]
+
+jobs:
+  build:
+    name: Test and build toolbox
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+          submodules: recursive
+
+      - name: Set up products
+        uses: matlab-actions/setup-matlab@v3
+        with:
+          release: latest
+          cache: true
+
+      - name: Build toolbox file
+        uses: matlab-actions/run-build@v3
+        with:
+          build-options: -buildFile release/buildfile.m
+          tasks: check test release
+
+      - name: Upload toolbox artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: matlab-toolbox
+          path: "*.mltbx"
+          if-no-files-found: error
+
+  release:
+    name: Add mltbx file to release artifacts
+    needs: build
+    if: github.event_name == 'release'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download toolbox artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: matlab-toolbox
+          path: .
+
+      - name: Upload toolbox to GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.release.tag_name }}
+          files: ./*.mltbx
+          fail_on_unmatched_files: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
