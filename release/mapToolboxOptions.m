@@ -38,24 +38,42 @@ pid = pkg.id;
 opts = matlab.addons.toolbox.ToolboxOptions(root, pid);
 
 % NOTE: R2026b uses ToolboxName = pkg.display_name and .PackageName = pkg.name
-opts.ToolboxName = pkg.name;
-opts.ToolboxVersion = pkg.version;
 
-opts.AuthorName = pkg.provider.name;
-opts.AuthorCompany = pkg.provider.organization;
-opts.AuthorEmail = pkg.provider.email;
-opts.Summary = pkg.summary;
-opts.Description = pkg.description;
+FIELD_MAP = {
+    'ToolboxName', 'display_name';
+    'ToolboxVersion', 'version';
+    'AuthorName', 'provider.name';
+    'AuthorCompany', 'provider.organization';
+    'AuthorEmail', 'provider.email';
+    'Summary', 'summary';
+    'Description', 'description';
+    'ToolboxMatlabPath', 'folders.path';
+    'ToolboxImageFile', 'preview_image_file';
+    'ToolboxGettingStartedGuide', 'getting_started_file';
+};
 
-opts.ToolboxMatlabPath = pkg.folders.path;
+for j = 1:size(FIELD_MAP,1)
+    tgt = FIELD_MAP{j,1};
+    try
+        % get [nested] pkg field
+        src = strsplit(FIELD_MAP{j,2},'.');
+        val = getfield(pkg, {1}, src{:});
+    catch err
+        if err.identifier ~= "MATLAB:nonExistentField", rethrow(err); end
+        continue;
+    end
+    opts.(tgt) = val;
+end
 
+if isfield(pkg, 'release_compatibility') && ~isempty(pkg.release_compatibility)
 opts = mapReleases(pkg.release_compatibility, opts);
+end
 
+if isfield(pkg, 'supported_platforms') && ~isempty(pkg.supported_platforms)
 % TODO: TOML doesn't record "MATLAB online" compatibility
 opts.SupportedPlatforms = mapSupportedPlatforms(pkg.supported_platforms);
+end
 
-opts.ToolboxImageFile = pkg.preview_image_file;
-opts.ToolboxGettingStartedGuide = pkg.getting_started_file;
 opts.OutputFile = [pkg.name '@' pkg.version '.mltbx'];
 
 % TODO: TOML doesn't record MATLAB addons?
