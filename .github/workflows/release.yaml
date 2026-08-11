@@ -6,8 +6,9 @@ permissions:
 on:
   pull_request:
     branches: [main]
-  release:
-    types: [published]
+  push:
+    tags:
+      - v*
 
 jobs:
   build:
@@ -19,6 +20,27 @@ jobs:
         with:
           fetch-depth: 1
           submodules: recursive
+
+      - name: Check tag matches matlab.toml version
+        if: startsWith(github.ref, 'refs/tags/')
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          tag_version="${GITHUB_REF_NAME#v}"
+          package_version="$(grep -m1 '^version = ' matlab.toml | sed -E 's/^version = "([^"]+)".*/\1/' || true)"
+
+          if [[ -z "$package_version" ]]; then
+            echo "Could not find version in matlab.toml"
+            exit 1
+          fi
+
+          if [[ "$tag_version" != "$package_version" ]]; then
+            echo "Tag version ($tag_version) does not match matlab.toml package version ($package_version)."
+            exit 1
+          fi
+
+          echo "Tag version matches matlab.toml package version: $package_version"
 
       - name: Set up products
         uses: matlab-actions/setup-matlab@v3
@@ -42,7 +64,7 @@ jobs:
   release:
     name: Add mltbx file to release artifacts
     needs: build
-    if: github.event_name == 'release'
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
     steps:
       - name: Download toolbox artifact
@@ -54,8 +76,9 @@ jobs:
       - name: Upload toolbox to GitHub release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.event.release.tag_name }}
+          tag_name: ${{ github.ref_name }}
           files: ./*.mltbx
           fail_on_unmatched_files: true
+          draft: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
