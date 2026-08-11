@@ -66,18 +66,20 @@ for j = 1:size(FIELD_MAP,1)
 end
 
 if isfield(pkg, 'release_compatibility') && ~isempty(pkg.release_compatibility)
-opts = mapReleases(pkg.release_compatibility, opts);
+    opts = mapReleases(pkg.release_compatibility, opts);
 end
 
 if isfield(pkg, 'supported_platforms') && ~isempty(pkg.supported_platforms)
-% TODO: TOML doesn't record "MATLAB online" compatibility
-opts.SupportedPlatforms = mapSupportedPlatforms(pkg.supported_platforms);
+    % TODO: TOML doesn't record "MATLAB online" compatibility
+    opts.SupportedPlatforms = mapSupportedPlatforms(pkg.supported_platforms);
 end
 
 opts.OutputFile = [pkg.name '@' pkg.version '.mltbx'];
 
-% TODO: TOML doesn't record MATLAB addons?
-% opts.RequiredAddons = ?
+% TODO: complete mapping of dependencies (download URL, fancy version ranges, etc.)
+if isfield(prj, 'dependencies') && ~isempty(prj.dependencies)
+    opts.RequiredAddons = mapDependencies(prj.dependencies);
+end
 
 % TODO: ToolboxOptions doesn't support non-scalar platforms
 % opts.RequiredAdditionalSoftware = f(pkg.required_additional_software);
@@ -154,4 +156,32 @@ function s = mapSupportedPlatforms(supported_platforms)
         map.Mac='macos';
     end
     s = structfun(@(x) ismember(x, supported_platforms), map, 'unif', false);
+end
+
+function addons = mapDependencies(deps)
+
+    deps = cellfun(@(f) matlab.mpm.Dependency(f, deps.(f).version, deps.(f).id), fieldnames(deps));
+    addons = arrayfun(@dep2addon, deps);
+end
+
+function s = dep2addon(dep)
+
+    vspecs = strsplit(dep.VersionRange, ' ');
+    a = 'latest';
+    b = 'latest';
+    for j = 1:numel(vspecs)
+        spec = strtrim(vspecs{j});
+        if startsWith(spec, '<=')
+            b = spec(3:end);
+        elseif startsWith(spec, '>=')
+            a = spec(3:end);
+        elseif startsWith(spec, '=')
+            a = spec(2:end);
+            b = spec(2:end);
+        else
+            error('mapToolboxOptions:versionRange','Only <=, =, and >= version ranges are supported');
+        end
+    end
+
+    s = struct('Name', dep.Name, 'Identifier', dep.ID, 'EarliestVersion', string(a), 'LatestVersion', string(b), 'DownloadURL', "");
 end

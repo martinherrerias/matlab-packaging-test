@@ -10,6 +10,9 @@ test = [
     "tests",
 ]
 
+[dependencies]
+matlab_toml = {version = ">=1.3", id = "b07fcaf1-c632-4418-b3ff-199244221efc"}
+
 [project]
 summary = "Test of new TOML project structure"
 startup-files = [
@@ -52,5 +55,3 @@ supported-platforms = [
     "linux",
     "macos",
 ]
-
-# TODO: Add Dependencies
