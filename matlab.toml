@@ -1,4 +1,4 @@
-name = "TestPackage"
+name = "TemplatePackage"
 
 # Development environment (folders added to the path when project is loaded)
 [folders]
@@ -14,7 +14,7 @@ test = [
 PkgBuild = {version = ">=1.0", id = "88a98551-056e-41b9-ac04-3f9a08225bf9"}
 
 [project]
-summary = "Test of new TOML project structure"
+summary = "Tempate for TOML-based MATLAB package"
 startup-files = [
     "scripts/startup.m",
 ]
@@ -22,28 +22,27 @@ shutdown-files = [
     "scripts/shutdown.m",
 ]
 
-[project.labels.test]
-
 [[package]]
 configuration-name = "Release"
 
-name = "TestPackage"
-display-name = "Test Package"
-version = "0.3.0"
+name = "TemplatePackage"
+display-name = "Template Package"
+version = "0.0.0"
 
 # Should match UUID assigned by File Exchange
-id = "88a98551-056e-41b9-ac04-3f9a08225bf9"
+# Use PkgBuild.newUUID for a new package
+id = "abcd1234-5678-90ab-cdef-1234567890ab"
 
 # Execution environment (folders added to end-user path)
 package-root = "/"
 folders.path = ["."]
 
 use-license-bsd = true
-provider.name = "Martin"
-provider.email = "martin.herreriasazcue@manchester.ac.uk"
-provider.organization = "University of Manchester"
-summary = "Test of new TOML package structure"
-description = "An experiment for CI/CD of MATLAB toolboxes (soon 'packages'), trying to embrace the R2026b transition to TOML-based projects."
+provider.name = "John Doe"
+provider.email = "john.doe@example.com"
+provider.organization = "Example Organization"
+summary = "Template for TOML-based MATLAB package"
+description = "You should edit this description to describe your package"
 
 getting-started-file = "doc/GettingStarted.m"
 preview-image-file = "resources/chicken-icon.png"

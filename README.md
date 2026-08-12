@@ -1,77 +1,52 @@
-# TestPackage
+# TemplatePackage
 
-This is an experiment to try to figure out how to do CI/CD of MATLAB toolboxes 
-(soon "packages"), trying to embrace the R2026b transition to TOML-based projects.
+This is a reusable MATLAB package scaffold intended to be cloned as the starting point for new work:
 
-## Requirements
-
-- Aiming for it to work on R2025a+ and all platforms
-- For anything before R2026b, we might need an external [matlab-toml](https://github.com/g-s-k/matlab-toml) parser (see [below](#r2026b-pre-release)).
-
-## Target Features
-
-> [!NOTE]
-> Most of these are still *aspirational*
-
-- Single source of project metadata (no copy-paste to `resources/mpackage.json` and [FileExchange](https://mathworks.com/matlabcentral/fileexchange) UI)
-- Versioned deployments to FileExchange using GitHub actions
-- Clear definition of paths that are bundled/excluded in the package
-- Clear definition of paths that are added to the user path during install
-- Install/uninstall "hook" scripts to do one-time tasks?
-
-# MATLAB Packaging Notes
-
-## GitHub Integration
-
-Since [2024](https://uk.mathworks.com/matlabcentral/discussions/highlights/847426-enhancing-github-and-file-exchange-connection-matlab-and-simulink-integration-for-github-unveiled), it seems it is possible to link a raw GitHub repo and let it appear as a [FileExchange](https://www.mathworks.com/matlabcentral/fileexchange) repository:
-
-<https://github.com/apps/matlab-and-simulink-integration/>
-
-The [`mpackage.json`](#mpmcreate-and-mpminstall) and [`matlab.toml`](#r2026b-pre-release) files are utterly ignored. ~~The same metadata has to be entered manually in the web UI... and I'm guessing it has to be periodically updated by hand?~~
-
-*UPDATE*: According to [MATLAB support](https://github.com/gibbonCode/GIBBON/issues/202#issuecomment-5128953874):
-
-> if you attach a .mltbx file as an asset to your GitHub release, File Exchange will automatically extract metadata embedded inside the .mltbx including title, version, MATLAB release compatibility range, required products, and UUID. This is currently the most automated route available for keeping your File Exchange listing up to date without manual web UI entry for those fields.
-
-This is yet to be implemented.
-
-## R2026a and older versions
-
-### _Package Toolbox_ from the Add-Ons menu
-
-- Metadata (entered through _Project_ UI) stored in a mess of XML files under `resources/project` (and `%appdata%` or equivalent).
-- Projects don't work together with [`mpm`](#mpmcreate-and-mpminstall) packages.
-- Outputs `*.mltbx` file. ~~Not sure if this can be pushed to FileExchange via an API/GitHub-action.~~
-
-*UPDATE*: In [theory](#github-integration) adding the `*.mltbx` file as an asset to a GitHub release should be enough for FileExchange to extract the metadata.
-
-### [`mpmcreate`](https://mathworks.com/help/matlab/ref/mpmcreate.html) and [`mpminstall`](https://mathworks.com/help/matlab/ref/mpminstall.html)
-
-- Package config stored in `resources/mpackage.json`.
-- Doesn't play together with project files.
-- Meant for local distribution (_Repositories_ are local folders).
-
-### [`matlab.addons.toolbox.ToolboxOptions`](https://mathworks.com/help/matlab/ref/matlab.addons.toolbox.toolboxoptions.html)
-
-Can be used to build a `*.mltbx` file programmatically. Some settings (but not all?) get imported from `resources/mpackage.json` (see [below](#mpmcreate-and-mpminstall)). Omissions/extensions could be addressed by parsing the JSON/TOML manually?
-
-```matlab
-identifier = '9dae281f-ff1f-4f2e-a885-ad27c79cf1fb';
-opts = matlab.addons.toolbox.ToolboxOptions(pwd, identifier);
-
-% 
-opts.ToolboxName: "example"
-opts.ToolboxVersion: "0.1.0"
-% ...
-
-matlab.addons.toolbox.packageToolbox(opts);
+```
+git clone -d1 --branch template https://github.com/UoMResearchIT/MATLAB-Package-Builder my-new-package
 ```
 
-## R2026b (pre-release)
+It is also used by the main branch (the **`PkgBuild`** utility) as testbed and source of individual file templates.
 
-- `matlab.toml` resolves the XML mess, and mostly[^1] works with `matlab.addons.toolbox.packageToolbox`
-- `FileExchange` should be integrated as an `mpm` Repository, but it's not working yet (listed in known issues).
-- `mpmcreate/install` still disconnected from (but can co-exist with) project file.
-- R2026b not yet available on Docker or GH actions :(
+## Scope
 
-[^1]: Everything but multi-platform dependencies?
+This is an opinionated structre template. Its job is to provide a sensible starting point for MATLAB toolbox development, with:
+
+- a single source of project metadata in [matlab.toml](matlab.toml) (in line with R2026b+)
+- a clean separation between bundled package content and development-only files
+- good software engineering practices (unit-tests, name-spacing, documentation, etc.)
+- CI/CD GitHub integration
+
+## Repository layout
+
+- [matlab.toml](matlab.toml) — central project metadata and package configuration
+- [package.ignore](package.ignore) — files and folders [excluded](#excluded-files-and-folders) from the packaged toolbox bundle.
+- [+TemplatePackage/](+TemplatePackage/) — MATLAB [package namespace](#package-namespace); rename this to match your package.
+- [doc/](doc/) — documentation and getting-started content bundled with the package
+- [external/](external/) — third-party code or git submodules used during development (see [below](#external-dependencies))
+- [resources/](resources/) — build tooling and packaging assets
+- [scripts/](scripts/) — startup and shutdown hooks for the workspace
+- [tests/](tests/) — example unit tests for the project
+
+## Excluded files and folders
+
+The `package.ignore` file lists files and folders that should not be included in the packaged toolbox bundle. This is important to keep the end-user installation clean and free of development artifacts.
+
+In R2025a-R2026a this file was called `toolbox.ignore`. *PkgBuild* should adjust the name automatically depending on the MATLAB version.
+
+## Package namespace
+
+It's good manners to [namespace](https://mathworks.com/help/matlab/matlab_oop/namespaces.html) your package functions, to avoid name collisions with other packages. Functions will be avaiable to the user as `YourPackage.functionName`. For existing code, you can always `import YourPackage.*` and use the bare function names.
+
+### External dependencies
+
+The `external/` directory is intended for dependencies that are required for  runtime/development, but should not be shipped as part of the published toolbox bundle (by default, the directory is listed in `package.ignore`). See the [external/README.md](external/README.md) for details.
+
+
+## CI/CD
+
+The project is set up to use GitHub Actions for continuous integration and deployment. The workflow is defined in `.github/workflows/release.yml` and wraps a call to `buildtool -buildFile resources/buildfile.m` triggered by a (`v`-prefixed) tag push. It should run tests, check for code warnings, bundle the package into a `*mltbx` file, and attach it to a draft release. When configured 
+
+Set `draft: false` in the workflow to automatically publish the release, or leave it as `true` to manually review and publish.
+
+The first time you create a release for a project, you will have to [configure FileExchange](https://uk.mathworks.com/matlabcentral/fileexchange/my-file-exchange/github-app-installation-guide) to automatically upload package releases.

@@ -71,14 +71,14 @@ function testWritingAFileWorks(testCase)
 end
 
 function testDummyNoArgs(testCase)
-    testCase.verifyEqual(TestPackage.dummy(), 42)
+    testCase.verifyEqual(TemplatePackage.dummy(), 42)
 end
 
 function testHelperFunction(testCase)
 
     % Another example, this time using a helper function defined below
     result = some_helper_function(6, 7);
-    testCase.verifyEqual(TestPackage.dummy(6, 7), result, 'AbsTol', 1e-6);
+    testCase.verifyEqual(TemplatePackage.dummy(6, 7), result, 'AbsTol', 1e-6);
 end
 
 %% (Optional) helper functions
