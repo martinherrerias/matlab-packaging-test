@@ -51,7 +51,7 @@ jobs:
       - name: Build toolbox file
         uses: matlab-actions/run-build@v3
         with:
-          build-options: -buildFile release/buildfile.m
+          build-options: -buildFile resources/buildfile.m
           tasks: check test release
 
       - name: Upload toolbox artifact
