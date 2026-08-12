@@ -46,7 +46,7 @@ summary = "Test of new TOML package structure"
 description = "An experiment for CI/CD of MATLAB toolboxes (soon 'packages'), trying to embrace the R2026b transition to TOML-based projects."
 
 getting-started-file = "doc/GettingStarted.m"
-preview-image-file = "resources/package-icon.png"
+preview-image-file = "resources/chicken-icon.png"
 
 # R2025a is the first release to support toolbox.ignore
 release-compatibility = "25.1.* - 26.2.*"

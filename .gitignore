@@ -8,8 +8,6 @@
 
 *.html
 resources/*
-!resources/mpackage.json
-!resources/package-icon.png
-!resources/package-icon.info
+!resources/chicken-icon.png
 
 deploymentLog.html
