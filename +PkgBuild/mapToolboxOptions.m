@@ -1,30 +1,50 @@
 function opts = mapToolboxOptions(prjTOML)
 % Populate matlab.addons.toolbox.ToolboxOptions from matlab.toml,
 % trying to ensure consistent behavior pre- and post-R2026b
+%
+% Syntax:
+%   opts = PkgBuild.mapToolboxOptions(prjTOML)
 
 arguments
-    prjTOML (1,1) string {mustBeFile} = prjPath('matlab.toml')
+    prjTOML (1,1) string {mustBeFile}
 end
 
-wd = cd(fileparts(prjTOML));
+root = fileparts(prjTOML);
+if strlength(root) == 0, root = pwd(); end
+wd = cd(root);
 restoreWd = onCleanup(@() cd(wd));
 
+%% R2026b+ can populate options automatically from the matlab.toml
 if version('-release') >= "2026b"
-% R2026b+ can populate options automatically from the matlab.toml
 
+    if isfile("toolbox.ignore") && ~isfile("package.ignore")
+        copyfile("toolbox.ignore", "package.ignore");
+        cleanupIgnore = onCleanup(@() delete("package.ignore"));
+    end
     if isfile("package.ignore")
         ws = warning();
         restoreWs = onCleanup(@() warning(ws));
         warning('off','MATLAB:toolbox_packaging:packaging:ToolboxIgnoreDeprecated');
     end
+
     opts = matlab.addons.toolbox.ToolboxOptions(prjTOML);
 
-    opts.Readme = prjPath('README.md');
+    if isfile('README.md')
+        opts.Readme = 'README.md';
+    end
+
     opts.OutputFile = opts.PackageName + '@' + opts.ToolboxVersion + '.mltbx';
+
     return
 end
 
-% for <= R2026a, use external/matlab-toml parser
+%% for <= R2026a, use external/matlab-toml parser
+
+if isfile("package.ignore") && ~isfile("toolbox.ignore")
+    copyfile("package.ignore", "toolbox.ignore");
+    cleanupIgnore = onCleanup(@() delete("toolbox.ignore"));
+end
+
 
 ps = path;
 addpath('external/matlab-toml');
@@ -33,7 +53,7 @@ restorePath = onCleanup(@() path(ps));
 prj = readTOML(prjTOML);
 pkg = prj.package;
 
-root = fullfile(fileparts(prjTOML), pkg.package_root);
+root = fullfile(pwd, pkg.package_root);
 pid = pkg.id;
 opts = matlab.addons.toolbox.ToolboxOptions(root, pid);
 
@@ -87,18 +107,6 @@ end
 % % TODO: pointers to example/tutorial files
 % opts.AppGalleryFiles: [0×0 string]
 
-end
-
-function path = prjPath(varargin)
-    try
-        [status, root] = system('git rev-parse --show-toplevel');
-        assert(status == 0);
-        root = strtrim(root);
-    catch err
-        root = fileparts(fileparts(mfilename('fullpath')));
-        if isempty(root), root = pwd; end
-    end
-    path = fullfile(root, varargin{:});
 end
 
 function cfg = readTOML(prjTOML)
