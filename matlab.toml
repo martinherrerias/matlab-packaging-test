@@ -3,7 +3,6 @@ name = "PkgBuild"
 # Development environment (folders added to the path when project is loaded)
 [folders]
 path = [
-    "resources",
     ".",
 ]
 test = [
