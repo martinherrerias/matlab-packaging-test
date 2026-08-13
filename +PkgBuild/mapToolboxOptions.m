@@ -45,11 +45,6 @@ if isfile("package.ignore") && ~isfile("toolbox.ignore")
     cleanupIgnore = onCleanup(@() delete("toolbox.ignore"));
 end
 
-
-ps = path;
-addpath('external/matlab-toml');
-restorePath = onCleanup(@() path(ps));
-
 prj = readTOML(prjTOML);
 pkg = prj.package;
 
@@ -110,6 +105,17 @@ end
 end
 
 function cfg = readTOML(prjTOML)
+
+    if isempty(which('toml.read'))
+        try
+            originalPath = path;
+            restorePath = onCleanup(@() path(originalPath));
+            addpath(fullfile(PkgBuildRoot,'external','matlab-toml'));
+            assert(~isempty(which('toml.read')));
+        catch
+            error('PkgBuild:mapToolboxOptions:toml', 'Failed to load external matlab-toml parser. Please ensure external/matlab-toml is on the path.');
+        end
+    end
     cfg = toml.read(prjTOML);
     cfg = toml.map_to_struct(cfg);
     cfg = flattenCells(cfg);
