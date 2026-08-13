@@ -32,6 +32,7 @@
 **/*.asv
 **/*.m~
 **/*.prj.bak
+**/.Trash*
 
 % Local MATLAB/Simulink tool caches
 **/slprj

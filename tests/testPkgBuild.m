@@ -6,9 +6,8 @@ function setupOnce(testCase)
 
     tempDir = tempname;
     mkdir(tempDir);
-
     testCase.TestData.myTempDir = tempDir;
-    testCase.TestData.tomlFile = fullfile(fileparts(mfilename('fullpath')), '..', 'matlab.toml');
+    PkgBuild.template(prj=tempDir);
 end
 
 function teardownOnce(testCase)
@@ -33,13 +32,13 @@ end
 %% Test functions
 
 function testMapToolboxOptionsReturnsOptions(testCase)
-    opts = PkgBuild.mapToolboxOptions(testCase.TestData.tomlFile);
+    opts = PkgBuild.mapToolboxOptions('matlab.toml');
     testCase.verifyClass(opts, 'matlab.addons.toolbox.ToolboxOptions');
 end
 
-function testFromTOMLProducesFile(testCase)
+function testFromTOMLNoDependencies(testCase)
     outputFile = fullfile(testCase.TestData.myTempDir, 'output.mltbx');
-    overrides = {'OutputFile', 'output.mltbx', 'ToolboxVersion', '0.0.0'};
-    PkgBuild.fromTOML(testCase.TestData.tomlFile, overrides{:});
+    overrides = {'OutputFile', 'output.mltbx', 'RequiredAddons', []};
+    PkgBuild.fromTOML('matlab.toml', overrides{:});
     testCase.verifyTrue(isfile(outputFile));
 end
