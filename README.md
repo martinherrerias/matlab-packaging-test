@@ -1,7 +1,9 @@
-# TestPackage
+# PkgBuild
 
-This is an experiment to try to figure out how to do CI/CD of MATLAB toolboxes 
-(soon "packages"), trying to embrace the R2026b transition to TOML-based projects.
+Build MATLAB toolboxes from `matlab.toml` on R2026a and earlier.
+`PkgBuild.fromTOML` is a compatibility shim that packages a `.mltbx` from a
+`matlab.toml` project file on MATLAB releases where native TOML support is not
+yet available (introduced in R2026b).
 
 ## Requirements
 

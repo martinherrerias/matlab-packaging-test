@@ -1,1 +1,0 @@
-This directory should be bundled in the package, but not added automatically to the MATLAB path.
