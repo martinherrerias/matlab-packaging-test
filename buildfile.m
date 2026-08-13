@@ -5,7 +5,7 @@ plan = buildplan(localfunctions);
 
 plan("clean") = CleanTask;
 plan("check") = CodeIssuesTask;
-plan("test") = TestTask;
+plan("test") = TestTask('tests');
 plan("release").Dependencies = ["check" "test"];
 
 plan.DefaultTasks = ["check" "test"];
