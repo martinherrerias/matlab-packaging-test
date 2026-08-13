@@ -1,7 +1,7 @@
 function template(pat, opt)
 % Copy package template files to a target location
 % Syntax:
-%   PkgBuild.template([PATTERNS],[prj=pwd],[dryrun=false])
+%   PkgBuild.template([PATTERNS],[prj=pwd],[dryrun=false],[quiet=false])
 % Examples:
 %   % To see the list of available files, use either
 %   PkgBuild.template(dryrun=true)
@@ -23,6 +23,7 @@ function template(pat, opt)
     arguments
         opt.prj (1,1) string {mustBeFolder} = pwd()
         opt.dryrun (1,1) logical = false
+        opt.quiet (1,1) logical = false
     end
 
     templateRoot = fullfile(PkgBuildRoot,'template');
@@ -47,15 +48,21 @@ function template(pat, opt)
     tgt = arrayfun(@(r) fullfile(opt.prj,r), rel);
     existing = arrayfun(@isfile, tgt);
 
-    [toCopy, toSkip] = reportMessages(rel, existing, opt);
-    disp(toCopy);
+    if ~opt.quiet
+        [toCopy, toSkip] = reportMessages(rel, existing, opt);
 
-    if opt.dryrun 
-        disp(toSkip);
-        return
+        disp(toCopy);
+        if any(existing)
+            if opt.dryrun
+                disp(toSkip);
+            else
+                warning('PkgBuild:template:skip', toSkip);
+            end
+        end
     end
-    if any(existing)
-        warning('PkgBuild:template:skip', toSkip);
+
+    if opt.dryrun
+        return
     end
 
     for j = find(~existing(:))'

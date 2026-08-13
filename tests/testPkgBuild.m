@@ -7,7 +7,7 @@ function setupOnce(testCase)
     tempDir = tempname;
     mkdir(tempDir);
     testCase.TestData.myTempDir = tempDir;
-    PkgBuild.template(prj=tempDir);
+    PkgBuild.template(prj=tempDir, quiet=true);
 end
 
 function teardownOnce(testCase)
