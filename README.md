@@ -1,79 +1,72 @@
 # PkgBuild
 
-Build MATLAB toolboxes from `matlab.toml` on R2026a and earlier.
-`PkgBuild.fromTOML` is a compatibility shim that packages a `.mltbx` from a
-`matlab.toml` project file on MATLAB releases where native TOML support is not
-yet available (introduced in R2026b).
+`PkgBuild` is at the same time an opinionated MATLAB project template and toolbox packaging utility. It tries to navigate the confusing MATLAB packaging landscape, embracing the transition to the post-R2026b `matlab.toml` project structure, but trying to wedge it into GitHub workflows that run on older MATLAB releases.
+
+It has two main entry-points:
+
+- `PkgBuild.fromTOML` builds a MATLAB toolbox file (`*.mltbx`) from a `matlab.toml`.
+- `PkgBuild.template` copies project files and folders from a reusable template.
+
+The overall structure of the package might be clearer when looking at the [template README](./template/README.md) (the _template_ is just another branch of this same repo). Beyond CI/CD, the template tries to encourage good software engineering practices (unit testing, namespacing, dependency management, etc.), sorely missing from many MATLAB projects in the wild.
 
 ## Requirements
 
-- Aiming for it to work on R2025a+ and all platforms
-- For anything before R2026b, we might need an external [matlab-toml](https://github.com/g-s-k/matlab-toml) parser (see [below](#r2026b-pre-release)).
+- Aiming for it to work on R2025a+ and all platforms (support for `toolbox.ignore` is missing on older releases, but most features should still work).
+- For anything before R2026b, it uses an external [matlab-toml](https://github.com/g-s-k/matlab-toml) parser (see [below](#toml-projects-on-r2026b-pre-release)).
 
-## Target Features
+## Getting started
 
-> [!NOTE]
-> Most of these are still *aspirational*
+To create a new toolbox project from the packaged template:
 
-- Single source of project metadata (no copy-paste to `resources/mpackage.json` and [FileExchange](https://mathworks.com/matlabcentral/fileexchange) UI)
-- Versioned deployments to FileExchange using GitHub actions
-- Clear definition of paths that are bundled/excluded in the package
-- Clear definition of paths that are added to the user path during install
-- Install/uninstall "hook" scripts to do one-time tasks?
+```matlab
+mkdir('my_test_package')
+cd('my_test_package')
+PkgBuild.template()
+PkgBuild.fromTOML('matlab.toml')
+```
 
-# MATLAB Packaging Notes
+## Known Issues & Limitations
+
+- Mapping from `matlab.toml` to pre-R2026b `matlab.addons.toolbox.ToolboxOptions` is not complete (and some features might just be incompatible).
+- Older versions will not recognize the `matlab.toml` as a project file, i.e. things like startup/shudown scripts, path management, and other project settings will not be automatically applied *during development* (although most should work when the toolbox is installed).
+- `PkgBuild` has been tested on the R2026b-pre-release, but not on CI/CD runners yet... it also (hopefully) provide little value beyond templating at that point.
+
+
+# Design Notes
 
 ## GitHub Integration
 
-Since [2024](https://uk.mathworks.com/matlabcentral/discussions/highlights/847426-enhancing-github-and-file-exchange-connection-matlab-and-simulink-integration-for-github-unveiled), it seems it is possible to link a raw GitHub repo and let it appear as a [FileExchange](https://www.mathworks.com/matlabcentral/fileexchange) repository:
+Since [2024](https://uk.mathworks.com/matlabcentral/discussions/highlights/847426-enhancing-github-and-file-exchange-connection-matlab-and-simulink-integration-for-github-unveiled), it has been possible to link a raw GitHub repo and let it appear as a [FileExchange](https://www.mathworks.com/matlabcentral/fileexchange) repository.
 
-<https://github.com/apps/matlab-and-simulink-integration/>
+An annoying aspect is that the GitHub app and the FileExchange metadata pipeline do not read the package metadata from either an [`mpackage.json`](#mpmcreate-and-mpminstall) or [`matlab.toml`](#toml-projects-on-r2026b-pre-release) directly. If you want the metadata to be extracted automatically, the release asset (*at the time of release creation*) must contain a packaged `.mltbx` file, with the metadata embedded inside it.
 
-The [`mpackage.json`](#mpmcreate-and-mpminstall) and [`matlab.toml`](#r2026b-pre-release) files are utterly ignored. ~~The same metadata has to be entered manually in the web UI... and I'm guessing it has to be periodically updated by hand?~~
+This is the reason the template's `release.yml` is triggered on a tag push rather than on release. Having it generate a *draft* release allows you to download and test the `.mltbx` file before publishing, but this can be changed if you are confident in the build process.
 
-*UPDATE*: According to [MATLAB support](https://github.com/gibbonCode/GIBBON/issues/202#issuecomment-5128953874):
+## Toolboxes and packages on R2026a and older versions
 
-> if you attach a .mltbx file as an asset to your GitHub release, File Exchange will automatically extract metadata embedded inside the .mltbx including title, version, MATLAB release compatibility range, required products, and UUID. This is currently the most automated route available for keeping your File Exchange listing up to date without manual web UI entry for those fields.
-
-This is yet to be implemented.
-
-## R2026a and older versions
+Until R2026a, MATLAB offered two distinct packaging systems: [project-based](#package-toolboxfrom-the-add-onsmenu) toolboxes and [`mpm`](#mpmcreate-and-mpminstall) packages. Access through [`matlab.addons.toolbox.ToolboxOptions`](#matlabaddonstoolboxtoolboxoptions) allows some navigation in between, so it's the tool we're using.
 
 ### _Package Toolbox_ from the Add-Ons menu
 
 - Metadata (entered through _Project_ UI) stored in a mess of XML files under `resources/project` (and `%appdata%` or equivalent).
-- Projects don't work together with [`mpm`](#mpmcreate-and-mpminstall) packages.
-- Outputs `*.mltbx` file. ~~Not sure if this can be pushed to FileExchange via an API/GitHub-action.~~
-
-*UPDATE*: In [theory](#github-integration) adding the `*.mltbx` file as an asset to a GitHub release should be enough for FileExchange to extract the metadata.
+- Building the project would generate an `*.mltbx` file, that you could upload to FileExchange or share with colleagues.
 
 ### [`mpmcreate`](https://mathworks.com/help/matlab/ref/mpmcreate.html) and [`mpminstall`](https://mathworks.com/help/matlab/ref/mpminstall.html)
 
 - Package config stored in `resources/mpackage.json`.
-- Doesn't play together with project files.
 - Meant for local distribution (_Repositories_ are local folders).
 
 ### [`matlab.addons.toolbox.ToolboxOptions`](https://mathworks.com/help/matlab/ref/matlab.addons.toolbox.toolboxoptions.html)
 
-Can be used to build a `*.mltbx` file programmatically. Some settings (but not all?) get imported from `resources/mpackage.json` (see [below](#mpmcreate-and-mpminstall)). Omissions/extensions could be addressed by parsing the JSON/TOML manually?
+Can be used to build a `*.mltbx` file programmatically. Some settings (but not all?) get imported from `resources/mpackage.json`, if available.
 
-```matlab
-identifier = '9dae281f-ff1f-4f2e-a885-ad27c79cf1fb';
-opts = matlab.addons.toolbox.ToolboxOptions(pwd, identifier);
+## TOML projects on R2026b (pre-release)
 
-% 
-opts.ToolboxName: "example"
-opts.ToolboxVersion: "0.1.0"
-% ...
-
-matlab.addons.toolbox.packageToolbox(opts);
-```
-
-## R2026b (pre-release)
+The reason of picking `matlab.toml` over `mpackage.json` is that the former promises to integrate *project* features on top of packaging, and though painful to use now, should work smoothly in R2026b and later.
 
 - `matlab.toml` resolves the XML mess, and mostly[^1] works with `matlab.addons.toolbox.packageToolbox`
-- `FileExchange` should be integrated as an `mpm` Repository, but it's not working yet (listed in known issues).
-- `mpmcreate/install` still disconnected from (but can co-exist with) project file.
-- R2026b not yet available on Docker or GH actions :(
+- `FileExchange` should be integrated as an `mpm` Repository
+- `mpmcreate/install` seems still disconnected from (but can co-exist with) the TOML project file.
+- R2026b not yet available on Docker or GH actions - which is where `PkgBuild` comes to the rescue!
 
 [^1]: Everything but multi-platform dependencies?
