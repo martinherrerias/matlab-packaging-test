@@ -18,7 +18,7 @@ end
 function f = functionList()
 
     % TODO: use namespaceFunctions in R2026a+
-    EXCLUDED = ["help.m"];
+    EXCLUDED = {'help.m'};
     d = dir(fullfile(fileparts(mfilename('fullpath')),'*.m'));
     discards = arrayfun(@(d) ismember(d.name, EXCLUDED) || d.isdir, d);
     f = arrayfun(@(d) string(d.name(1:end-2)), d(~discards));
