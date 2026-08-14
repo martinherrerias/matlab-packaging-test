@@ -24,10 +24,7 @@ end
 %% R2026b+ can populate options automatically from the matlab.toml
 if ~useExternal
 
-    if isfile("toolbox.ignore") && ~isfile("package.ignore")
-        copyfile("toolbox.ignore", "package.ignore");
-        cleanupIgnore = onCleanup(@() delete("package.ignore"));
-    end
+    cleanupIgnore = tempFileCopy("toolbox.ignore", "package.ignore"); %#ok<NASGU>
 
     opts = matlab.addons.toolbox.ToolboxOptions(prjTOML);
 
@@ -42,10 +39,7 @@ end
 
 %% for <= R2026a, use external/matlab-toml parser
 
-if isfile("package.ignore") && ~isfile("toolbox.ignore")
-    copyfile("package.ignore", "toolbox.ignore");
-    cleanupIgnore = onCleanup(@() delete("toolbox.ignore"));
-end
+cleanupIgnore = tempFileCopy("package.ignore", "toolbox.ignore"); %#ok<NASGU>
 
 prj = PkgBuild.toml2struct(prjTOML, useExternal);
 pkg = prj.package;
@@ -167,4 +161,20 @@ function s = dep2addon(dep)
     end
 
     s = struct('Name', dep.Name, 'Identifier', dep.ID, 'EarliestVersion', string(a), 'LatestVersion', string(b), 'DownloadURL', "");
+end
+
+function cleaner = tempFileCopy(src, tgt)
+
+    if isfile(src) && ~isfile(tgt)
+        copyfile(src, tgt);
+        tgt = dir(tgt);
+        cleaner = onCleanup(@() deleteIfExisting(tgt));
+    else
+        cleaner = [];
+    end
+
+    function deleteIfExisting(d)
+        f = fullfile(d.folder, d.name);
+        if isfile(f), delete(f); end
+    end
 end
