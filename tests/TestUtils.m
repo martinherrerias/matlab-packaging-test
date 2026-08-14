@@ -8,6 +8,12 @@ classdef TestUtils < matlab.unittest.TestCase
 
     methods (Test)
 
+        function testStartup(testCase)
+            ownTOML = prjPath('matlab.toml'); %#ok<NASGU>
+            msg = evalc('PkgBuild.startup(ownTOML);');
+            testCase.verifyTrue(contains(msg, '42 is Numberwang'));
+        end
+
         function testToml2struct(testCase, projTOML)
             % read using external/matlab-toml
             s = PkgBuild.toml2struct(projTOML, true);

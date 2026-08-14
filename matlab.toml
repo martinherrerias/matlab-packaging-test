@@ -18,7 +18,6 @@ startup-files = [
     "scripts/startup.m",
 ]
 shutdown-files = [
-    "scripts/shutdown.m",
 ]
 
 [project.labels.test]
