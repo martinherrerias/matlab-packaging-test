@@ -3,6 +3,10 @@ import matlab.buildtool.tasks.*
 
 plan = buildplan(localfunctions);
 
+if version('-release') < "2026b"
+    PkgBuild.startup();
+end
+
 plan("clean") = CleanTask;
 plan("check") = CodeIssuesTask;
 plan("test") = TestTask('tests');
