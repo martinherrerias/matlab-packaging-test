@@ -20,11 +20,12 @@ This is an opinionated structre template. Its job is to provide a sensible start
 ## Repository layout
 
 - [matlab.toml](matlab.toml) — central project metadata and package configuration
+- [buildfile.m](buildfile.m) — `buildtool` script, rigged to use `PkgBuild.fromTOML` as `release` task.
 - [package.ignore](package.ignore) — files and folders [excluded](#excluded-files-and-folders) from the packaged toolbox bundle.
 - [+TemplatePackage/](+TemplatePackage/) — MATLAB [package namespace](#package-namespace); rename this to match your package.
 - [doc/](doc/) — documentation and getting-started content bundled with the package
 - [external/](external/) — third-party code or git submodules used during development (see [below](#external-dependencies))
-- [resources/](resources/) — build tooling and packaging assets
+- [resources/](resources/) — packaging assets (cannot contain MATLAB code)
 - [scripts/](scripts/) — startup and shutdown hooks for the workspace
 - [tests/](tests/) — example unit tests for the project
 
@@ -42,6 +43,9 @@ It's good manners to [namespace](https://mathworks.com/help/matlab/matlab_oop/na
 
 The `external/` directory is intended for dependencies that are required for  runtime/development, but should not be shipped as part of the published toolbox bundle (by default, the directory is listed in `package.ignore`). See the [external/README.md](external/README.md) for details.
 
+### Project hooks
+
+MATLAB versions older than R2026b will not recognize the `matlab.toml` as a project file, i.e. startup/shudown scripts, path management, and other project settings will not be automatically applied during development. As a workaround you could add `PkgBuild.startup();` to a `startup.m` file on your project root.
 
 ## CI/CD
 
