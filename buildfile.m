@@ -3,9 +3,13 @@ import matlab.buildtool.tasks.*
 
 plan = buildplan(localfunctions);
 
+if version('-release') < "2026b"
+    PkgBuild.startup();
+end
+
 plan("clean") = CleanTask;
 plan("check") = CodeIssuesTask;
-plan("test") = TestTask;
+plan("test") = TestTask('tests');
 plan("release").Dependencies = ["check" "test"];
 
 plan.DefaultTasks = ["check" "test"];
@@ -15,6 +19,5 @@ function releaseTask(~)
 % Package Toolbox using matlab-toml
 
     disp('Running release task')
-    opts = mapToolboxOptions();
-    matlab.addons.toolbox.packageToolbox(opts);
+    PkgBuild.fromTOML();
 end

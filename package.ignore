@@ -32,14 +32,15 @@
 **/*.asv
 **/*.m~
 **/*.prj.bak
+**/.Trash*
 
 % Local MATLAB/Simulink tool caches
 **/slprj
 **/.buildtool/
+buildtool.m
 
 % Project resources folder
 resources/
 
 % Package Specific
 external/
-release/

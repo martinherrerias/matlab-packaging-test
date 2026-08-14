@@ -1,3 +1,7 @@
 [submodule "external/matlab-toml"]
 	path = external/matlab-toml
 	url = git@github.com:g-s-k/matlab-toml.git
+[submodule "template"]
+	path = template
+	url = ./
+	branch = template

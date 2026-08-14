@@ -1,39 +1,50 @@
-function opts = mapToolboxOptions(prjTOML)
+function opts = mapToolboxOptions(prjTOML, useExternal)
 % Populate matlab.addons.toolbox.ToolboxOptions from matlab.toml,
 % trying to ensure consistent behavior pre- and post-R2026b
+%
+% Syntax:
+%   opts = PkgBuild.mapToolboxOptions(prjTOML)
 
 arguments
-    prjTOML (1,1) string {mustBeFile} = prjPath('matlab.toml')
+    prjTOML (1,1) string {mustBeFile} = 'matlab.toml'
+    useExternal (1,1) logical = version('-release') < "2026b"
 end
 
-wd = cd(fileparts(prjTOML));
+root = fileparts(prjTOML);
+if strlength(root) == 0, root = pwd(); end
+wd = cd(root);
 restoreWd = onCleanup(@() cd(wd));
 
-if version('-release') >= "2026b"
-% R2026b+ can populate options automatically from the matlab.toml
+if isfile("toolbox.ignore") && version('-release') >= "2026b"
+    ws = warning();
+    restoreWs = onCleanup(@() warning(ws));
+    warning('off','MATLAB:toolbox_packaging:packaging:ToolboxIgnoreDeprecated');
+end
 
-    if isfile("package.ignore")
-        ws = warning();
-        restoreWs = onCleanup(@() warning(ws));
-        warning('off','MATLAB:toolbox_packaging:packaging:ToolboxIgnoreDeprecated');
-    end
+%% R2026b+ can populate options automatically from the matlab.toml
+if ~useExternal
+
+    cleanupIgnore = tempFileCopy("toolbox.ignore", "package.ignore"); %#ok<NASGU>
+
     opts = matlab.addons.toolbox.ToolboxOptions(prjTOML);
 
-    opts.Readme = prjPath('README.md');
+    if isfile('README.md')
+        opts.Readme = 'README.md';
+    end
+
     opts.OutputFile = opts.PackageName + '@' + opts.ToolboxVersion + '.mltbx';
+
     return
 end
 
-% for <= R2026a, use external/matlab-toml parser
+%% for <= R2026a, use external/matlab-toml parser
 
-ps = path;
-addpath('external/matlab-toml');
-restorePath = onCleanup(@() path(ps));
+cleanupIgnore = tempFileCopy("package.ignore", "toolbox.ignore"); %#ok<NASGU>
 
-prj = readTOML(prjTOML);
+prj = PkgBuild.toml2struct(prjTOML, useExternal);
 pkg = prj.package;
 
-root = fullfile(fileparts(prjTOML), pkg.package_root);
+root = fullfile(pwd, pkg.package_root);
 pid = pkg.id;
 opts = matlab.addons.toolbox.ToolboxOptions(root, pid);
 
@@ -87,40 +98,6 @@ end
 % % TODO: pointers to example/tutorial files
 % opts.AppGalleryFiles: [0×0 string]
 
-end
-
-function path = prjPath(varargin)
-    try
-        [status, root] = system('git rev-parse --show-toplevel');
-        assert(status == 0);
-        root = strtrim(root);
-    catch err
-        root = fileparts(fileparts(mfilename('fullpath')));
-        if isempty(root), root = pwd; end
-    end
-    path = fullfile(root, varargin{:});
-end
-
-function cfg = readTOML(prjTOML)
-    cfg = toml.read(prjTOML);
-    cfg = toml.map_to_struct(cfg);
-    cfg = flattenCells(cfg);
-end
-
-function s = flattenCells(s)
-% toml.map_to_struct likes returning fields wrapped as single cells
-
-    for fld = fieldnames(s)'
-        f = fld{1};
-        v = s.(f);
-        if iscell(v) && isscalar(v)
-            v = v{1};
-        end
-        if isstruct(v)
-            v = flattenCells(v);
-        end
-        s.(f) = v;
-    end
 end
 
 function opts = mapReleases(release_compatibility, opts)
@@ -184,4 +161,20 @@ function s = dep2addon(dep)
     end
 
     s = struct('Name', dep.Name, 'Identifier', dep.ID, 'EarliestVersion', string(a), 'LatestVersion', string(b), 'DownloadURL', "");
+end
+
+function cleaner = tempFileCopy(src, tgt)
+
+    if isfile(src) && ~isfile(tgt)
+        copyfile(src, tgt);
+        tgt = dir(tgt);
+        cleaner = onCleanup(@() deleteIfExisting(tgt));
+    else
+        cleaner = [];
+    end
+
+    function deleteIfExisting(d)
+        f = fullfile(d.folder, d.name);
+        if isfile(f), delete(f); end
+    end
 end
