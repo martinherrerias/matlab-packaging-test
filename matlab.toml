@@ -27,7 +27,7 @@ configuration-name = "Release"
 
 name = "PkgBuild"
 display-name = "PkgBuild"
-version = "1.0.0"
+version = "1.1.0"
 
 # Should match UUID assigned by File Exchange
 id = "794f3978-8e02-4c93-9f6a-d5f4236db196"

@@ -79,6 +79,6 @@ jobs:
           files: ./*.mltbx
           fail_on_unmatched_files: true
           generate_release_notes: true
-          draft: true
+          draft: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
