@@ -11,10 +11,10 @@ test = [
 ]
 
 [dependencies]
-PkgBuild = {version = ">=1.0", id = "88a98551-056e-41b9-ac04-3f9a08225bf9"}
+PkgBuild = {version = ">=1.0", id = "794f3978-8e02-4c93-9f6a-d5f4236db196"}
 
 [project]
-summary = "Tempate for TOML-based MATLAB package"
+summary = "Template for TOML-based MATLAB package"
 startup-files = [
     "scripts/startup.m",
 ]
