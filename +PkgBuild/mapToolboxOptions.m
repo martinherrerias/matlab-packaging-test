@@ -1,4 +1,4 @@
-function opts = mapToolboxOptions(prjTOML)
+function opts = mapToolboxOptions(prjTOML, useExternal)
 % Populate matlab.addons.toolbox.ToolboxOptions from matlab.toml,
 % trying to ensure consistent behavior pre- and post-R2026b
 %
@@ -6,7 +6,8 @@ function opts = mapToolboxOptions(prjTOML)
 %   opts = PkgBuild.mapToolboxOptions(prjTOML)
 
 arguments
-    prjTOML (1,1) string {mustBeFile}
+    prjTOML (1,1) string {mustBeFile} = 'matlab.toml'
+    useExternal (1,1) logical = version('-release') < "2026b"
 end
 
 root = fileparts(prjTOML);
@@ -14,17 +15,18 @@ if strlength(root) == 0, root = pwd(); end
 wd = cd(root);
 restoreWd = onCleanup(@() cd(wd));
 
+if isfile("toolbox.ignore") && version('-release') >= "2026b"
+    ws = warning();
+    restoreWs = onCleanup(@() warning(ws));
+    warning('off','MATLAB:toolbox_packaging:packaging:ToolboxIgnoreDeprecated');
+end
+
 %% R2026b+ can populate options automatically from the matlab.toml
-if version('-release') >= "2026b"
+if ~useExternal
 
     if isfile("toolbox.ignore") && ~isfile("package.ignore")
         copyfile("toolbox.ignore", "package.ignore");
         cleanupIgnore = onCleanup(@() delete("package.ignore"));
-    end
-    if isfile("package.ignore")
-        ws = warning();
-        restoreWs = onCleanup(@() warning(ws));
-        warning('off','MATLAB:toolbox_packaging:packaging:ToolboxIgnoreDeprecated');
     end
 
     opts = matlab.addons.toolbox.ToolboxOptions(prjTOML);
@@ -45,7 +47,7 @@ if isfile("package.ignore") && ~isfile("toolbox.ignore")
     cleanupIgnore = onCleanup(@() delete("toolbox.ignore"));
 end
 
-prj = readTOML(prjTOML);
+prj = PkgBuild.toml2struct(prjTOML, useExternal);
 pkg = prj.package;
 
 root = fullfile(pwd, pkg.package_root);
@@ -102,39 +104,6 @@ end
 % % TODO: pointers to example/tutorial files
 % opts.AppGalleryFiles: [0×0 string]
 
-end
-
-function cfg = readTOML(prjTOML)
-
-    if isempty(which('toml.read'))
-        try
-            originalPath = path;
-            restorePath = onCleanup(@() path(originalPath));
-            addpath(fullfile(PkgBuildRoot,'external','matlab-toml'));
-            assert(~isempty(which('toml.read')));
-        catch
-            error('PkgBuild:mapToolboxOptions:toml', 'Failed to load external matlab-toml parser. Please ensure external/matlab-toml is on the path.');
-        end
-    end
-    cfg = toml.read(prjTOML);
-    cfg = toml.map_to_struct(cfg);
-    cfg = flattenCells(cfg);
-end
-
-function s = flattenCells(s)
-% toml.map_to_struct likes returning fields wrapped as single cells
-
-    for fld = fieldnames(s)'
-        f = fld{1};
-        v = s.(f);
-        if iscell(v) && isscalar(v)
-            v = v{1};
-        end
-        if isstruct(v)
-            v = flattenCells(v);
-        end
-        s.(f) = v;
-    end
 end
 
 function opts = mapReleases(release_compatibility, opts)

@@ -29,6 +29,6 @@ end
 function mustBeToolBoxOption(value)
     mc = ?matlab.addons.toolbox.ToolboxOptions;
     props = mc.PropertyList;
-    filter = arrayfun(@(p) p.Dependent || p.Constant || strcmp(p.SetAccess, 'immutable'), props);
+    filter = arrayfun(@(p) (p.Dependent && isempty(p.SetMethod)) || p.Constant || strcmp(p.SetAccess, 'immutable'), props);
     mustBeMember(value, {mc.PropertyList(~filter).Name})
 end

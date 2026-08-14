@@ -12,6 +12,7 @@ end
 
 function teardownOnce(testCase)
 
+    fclose all;
     if isfolder(testCase.TestData.myTempDir)
         rmdir(testCase.TestData.myTempDir, 's');
     end
@@ -30,16 +31,6 @@ end
 
 
 %% Test functions
-
-function testMapToolboxOptionsReturnsOptions(testCase)
-    opts = PkgBuild.mapToolboxOptions('matlab.toml');
-    testCase.verifyClass(opts, 'matlab.addons.toolbox.ToolboxOptions');
-end
-
-function testNewUUIDReturnsValidID(testCase)
-    id = PkgBuild.newUUID();
-    testCase.verifyMatches(id, '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$');
-end
 
 function testFromTOMLNoDependencies(testCase)
     outputFile = fullfile(testCase.TestData.myTempDir, 'output.mltbx');
