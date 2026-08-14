@@ -36,7 +36,7 @@ id = "794f3978-8e02-4c93-9f6a-d5f4236db196"
 package-root = "/"
 folders.path = ["."]
 
-use-license-bsd = true
+use-license-bsd = false
 provider.name = "Martin"
 provider.email = "martin.herreriasazcue@manchester.ac.uk"
 provider.organization = "University of Manchester"
