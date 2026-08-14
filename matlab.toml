@@ -30,7 +30,7 @@ display-name = "PkgBuild"
 version = "1.0.0"
 
 # Should match UUID assigned by File Exchange
-id = "88a98551-056e-41b9-ac04-3f9a08225bf9"
+id = "794f3978-8e02-4c93-9f6a-d5f4236db196"
 
 # Execution environment (folders added to end-user path)
 package-root = "/"
