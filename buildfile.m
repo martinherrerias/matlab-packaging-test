@@ -15,6 +15,5 @@ function releaseTask(~)
 % Package Toolbox using matlab-toml
 
     disp('Running release task')
-    tomlFile = fullfile(fileparts(mfilename('fullpath')), 'matlab.toml');
-    PkgBuild.fromTOML(tomlFile);
+    PkgBuild.fromTOML();
 end

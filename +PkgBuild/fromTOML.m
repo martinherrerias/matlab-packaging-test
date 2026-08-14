@@ -9,7 +9,7 @@ function fromTOML(prjTOML, propName, propVal)
 % See also: PkgBuild.mapToolboxOptions, matlab.addons.toolbox.packageToolbox
 
     arguments
-        prjTOML (1,1) string {mustBeFile}
+        prjTOML (1,1) string {mustBeFile} = 'matlab.toml'
     end
     
     arguments (Repeating)
