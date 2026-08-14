@@ -1,4 +1,4 @@
-# PkgBuild
+# MATLAB-Package-Builder
 
 `PkgBuild` is at the same time an opinionated MATLAB project template and toolbox packaging utility. It tries to navigate the confusing MATLAB packaging landscape, embracing the transition to the post-R2026b `matlab.toml` project structure, but trying to wedge it into GitHub workflows that run on older MATLAB releases.
 
@@ -7,30 +7,44 @@ It has two main entry-points:
 - `PkgBuild.fromTOML` builds a MATLAB toolbox file (`*.mltbx`) from a `matlab.toml`.
 - `PkgBuild.template` copies project files and folders from a reusable template.
 
-The overall structure of the package might be clearer when looking at the [template README](./template/README.md) (the _template_ is just another branch of this same repo). Beyond CI/CD, the template tries to encourage good software engineering practices (unit testing, namespacing, dependency management, etc.), sorely missing from many MATLAB projects in the wild.
+The overall structure of the package might be clearer when looking at the [template README](../template/README.md) (the _template_ is just another branch of this same repo). Beyond CI/CD, the template tries to encourage good software engineering practices (unit testing, namespacing, dependency management, etc.).
+
+> [!NOTE]
+> If you think we could do better, **please submit an issue or pull request**.
 
 ## Requirements
 
 - Aiming for it to work on R2025a+ and all platforms (support for `toolbox.ignore` is missing on older releases, but most features should still work).
 - For anything before R2026b, it uses an external [matlab-toml](https://github.com/g-s-k/matlab-toml) parser (see [below](#toml-projects-on-r2026b-pre-release)).
 
+## Setup
+
+Install via de Add-Ons explorer; download from [FileExchange](https://mathworks.com/matlabcentral/fileexchange/184426-matlab-package-builder); or clone, self-build, and install:
+
+```matlab
+!git clone --depth 1 --recurse-submodules https://github.com/UoMResearchIT/MATLAB-Package-Builder.git
+cd MATLAB-Package-Builder
+PkgBuild.fromTOML('matlab.toml', 'OutputFile','PkgBuild.mltbx')
+mpminstall('PkgBuild.mltbx')
+```
+
 ## Getting started
 
-To create a new toolbox project from the packaged template:
+To create and build a new toolbox project from the bundled template:
 
 ```matlab
 mkdir('my_test_package')
 cd('my_test_package')
 PkgBuild.template()
-PkgBuild.fromTOML('matlab.toml')
+PkgBuild.fromTOML()
 ```
 
 ## Known Issues & Limitations
 
 - Mapping from `matlab.toml` to pre-R2026b `matlab.addons.toolbox.ToolboxOptions` is not complete (and some features might just be incompatible).
-- Older versions will not recognize the `matlab.toml` as a project file, i.e. things like startup/shudown scripts, path management, and other project settings will not be automatically applied *during development* (although most should work when the toolbox is installed).
-- `PkgBuild` has been tested on the R2026b-pre-release, but not on CI/CD runners yet... it also (hopefully) provide little value beyond templating at that point.
-
+- Older versions will not recognize the `matlab.toml` as a project file, i.e. things like startup/shudown scripts, path management, and other project settings will not be automatically applied during development. As a workaround, `PkgBuild.startup` can read the `matlab.toml`, add the defined project paths and trigger the startup scripts.
+- `PkgBuild` has been tested on the R2026b-pre-release, but not on CI/CD runners yet... it will also (hopefully) provide little value beyond templating at that point.
+- We could probably do better with the docs, maybe render help files on CI/CD and show in the template what *good* MATLAB documentation looks like.
 
 # Design Notes
 
